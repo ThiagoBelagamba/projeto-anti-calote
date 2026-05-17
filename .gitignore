@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+!**/.env.example
+frontend/.env.local
+docs/CONTA-TURMA.local.md
+docs/project-plan..md
+node_modules/
+dist/
+.next/
+*.log
+.DS_Store
+evo_db_data/
+evo_redis_data/
+evo_instances/

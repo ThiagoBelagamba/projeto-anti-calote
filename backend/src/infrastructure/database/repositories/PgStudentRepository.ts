@@ -1,0 +1,69 @@
+import { Student, StudentStatus } from "../../../domain/entities/Student";
+import {
+  CreateStudentInput,
+  IStudentRepository,
+  StudentListItem,
+} from "../../../domain/repositories/IStudentRepository";
+import { db } from "../connection";
+
+export class PgStudentRepository implements IStudentRepository {
+  async findByEmail(email: string): Promise<Student | null> {
+    const row = await db("students").where({ email: email.toLowerCase() }).first();
+    return row || null;
+  }
+
+  async findById(id: string): Promise<Student | null> {
+    const row = await db("students").where({ id }).first();
+    return row || null;
+  }
+
+  async findAllWithSubscriptions(): Promise<StudentListItem[]> {
+    const students = await db("students").orderBy("created_at", "desc");
+    const result: StudentListItem[] = [];
+
+    for (const s of students) {
+      const sub = await db("subscriptions")
+        .where({ student_id: s.id })
+        .orderBy("created_at", "desc")
+        .first();
+
+      result.push({
+        id: s.id,
+        name: s.name,
+        email: s.email,
+        whatsapp: s.whatsapp,
+        document: s.document,
+        status: s.status,
+        created_at: s.created_at,
+        plan: sub?.plan ?? null,
+        subscription_status: sub?.status ?? null,
+        subscription_value: sub ? parseFloat(String(sub.value)) : null,
+      });
+    }
+
+    return result;
+  }
+
+  async create(data: CreateStudentInput): Promise<Student> {
+    const [row] = await db("students")
+      .insert({
+        name: data.name,
+        email: data.email.toLowerCase(),
+        password_hash: data.password_hash,
+        document: data.document,
+        whatsapp: data.whatsapp,
+        asaas_customer_id: data.asaas_customer_id ?? null,
+        status: data.status || "PENDING",
+      })
+      .returning("*");
+    return row;
+  }
+
+  async updateStatus(id: string, status: StudentStatus): Promise<void> {
+    await db("students").where({ id }).update({ status });
+  }
+
+  async updateAsaasCustomerId(id: string, asaasCustomerId: string): Promise<void> {
+    await db("students").where({ id }).update({ asaas_customer_id: asaasCustomerId });
+  }
+}

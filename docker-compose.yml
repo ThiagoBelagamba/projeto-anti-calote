@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: evolution_postgres_local
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_senha_local
+      POSTGRES_DB: evolution_db
+    volumes:
+      - evo_db_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d evolution_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: evolution_redis_local
+    restart: always
+    volumes:
+      - evo_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: evolution_rabbitmq_local
+    restart: always
+    ports:
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin_senha_local
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  evolution_api:
+    image: evoapicloud/evolution-api:v2.3.7
+    container_name: evolution_api_local
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - evo_instances:/evolution/instances
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SERVER_URL: http://localhost:8080
+      HOST: 0.0.0.0
+      AUTHENTICATION_API_KEY: anti_calote_evo_secret_123
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
+      DEL_INSTANCE: "false"
+      QRCODE_LIMIT: "1902"
+      LANGUAGE: pt-BR
+      DATABASE_ENABLED: "true"
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://postgres:postgres_senha_local@postgres:5432/evolution_db?schema=public
+      DATABASE_CONNECTION_CLIENT_NAME: evolution_local
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "true"
+      DATABASE_SAVE_DATA_LABELS: "true"
+      DATABASE_SAVE_DATA_HISTORIC: "true"
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://redis:6379/2
+      CACHE_REDIS_PREFIX_KEY: evolution_local
+      CACHE_REDIS_SAVE_INSTANCES: "false"
+      CACHE_LOCAL_ENABLED: "false"
+      RABBITMQ_ENABLED: "true"
+      RABBITMQ_URI: amqp://admin:admin_senha_local@rabbitmq:5672
+      RABBITMQ_EXCHANGE_NAME: evolution
+      RABBITMQ_GLOBAL_ENABLED: "false"
+      RABBITMQ_EVENTS_QRCODE_UPDATED: "true"
+      RABBITMQ_EVENTS_MESSAGES_UPSERT: "true"
+      RABBITMQ_EVENTS_CONNECTION_UPDATE: "true"
+
+volumes:
+  evo_db_data:
+  evo_redis_data:
+  evo_instances:
