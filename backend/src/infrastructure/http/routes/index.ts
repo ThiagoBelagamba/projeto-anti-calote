@@ -91,6 +91,12 @@ const webhookController = new WebhookController(
 
 const devController = new DevController(evolutionService);
 
+import { AuthController } from "../controllers/AuthController";
+import { LeadController } from "../controllers/LeadController";
+
+const authController = new AuthController();
+const leadController = new LeadController();
+
 export function createRoutes(): Router {
   const router = Router();
 
@@ -118,6 +124,9 @@ export function createRoutes(): Router {
   if (env.nodeEnv === "development") {
     router.post("/dev/test-whatsapp", devController.testWhatsApp);
   }
+
+  router.post("/auth/login", authController.login.bind(authController));
+  router.post("/leads", leadController.create.bind(leadController));
 
   return router;
 }

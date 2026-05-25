@@ -128,7 +128,7 @@ function AssinarForm() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
       <div className="mb-8 flex items-center gap-3">
-        <Dumbbell className="h-8 w-8 text-emerald-400" />
+        <Dumbbell className="h-8 w-8 text-red-600" />
         <div>
           <h1 className="text-2xl font-bold text-white">Assine sua matrícula</h1>
           <p className="text-slate-400">Plano mensal ou anual — pagamento no cartão</p>
@@ -147,7 +147,7 @@ function AssinarForm() {
             <label
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${
                 form.plan === "monthly"
-                  ? "border-emerald-500 bg-emerald-500/10"
+                  ? "border-red-600 bg-red-600/10"
                   : "border-slate-700 hover:border-slate-600"
               }`}
             >
@@ -156,7 +156,7 @@ function AssinarForm() {
                 name="plan"
                 checked={form.plan === "monthly"}
                 onChange={() => setForm({ ...form, plan: "monthly" })}
-                className="accent-emerald-500"
+                className="accent-red-600"
               />
               <div>
                 <span className="font-semibold text-white">Mensal</span>
@@ -167,7 +167,7 @@ function AssinarForm() {
             <label
               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all ${
                 form.plan === "annual"
-                  ? "border-emerald-500 bg-emerald-500/10"
+                  ? "border-red-600 bg-red-600/10"
                   : "border-slate-700 hover:border-slate-600"
               }`}
             >
@@ -176,7 +176,7 @@ function AssinarForm() {
                 name="plan"
                 checked={form.plan === "annual"}
                 onChange={() => setForm({ ...form, plan: "annual" })}
-                className="accent-emerald-500"
+                className="accent-red-600"
               />
               <div>
                 <span className="font-semibold text-white">Anual</span>
@@ -284,7 +284,7 @@ function AssinarForm() {
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
-        <Link href="/" className="text-emerald-400 hover:underline">
+        <Link href="/" className="text-slate-400 hover:text-white hover:underline">
           Voltar ao painel
         </Link>
       </p>

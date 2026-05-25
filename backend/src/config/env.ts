@@ -24,4 +24,5 @@ export const env = {
   evolutionInstanceName: process.env.EVOLUTION_INSTANCE_NAME || "projeto-teste",
   reguaEnabled: process.env.REGUA_ENABLED !== "false",
   reguaCron: process.env.REGUA_CRON || "0 9 * * *",
+  jwtSecret: process.env.JWT_SECRET || "supersecret-dev-key",
 };

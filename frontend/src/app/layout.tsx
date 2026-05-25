@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ShellWrapper } from "@/components/layout/ShellWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -9,6 +8,8 @@ export const metadata: Metadata = {
   title: "Anti-Calote | Gestão de Cobranças",
   description: "Sistema de cobrança automática via WhatsApp",
 };
+
+import { AuthProvider } from "@/lib/auth-context";
 
 export default function RootLayout({
   children,
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${inter.className} antialiased`}>
-        <ShellWrapper>{children}</ShellWrapper>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

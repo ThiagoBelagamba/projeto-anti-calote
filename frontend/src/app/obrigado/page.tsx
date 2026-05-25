@@ -13,9 +13,9 @@ function ObrigadoContent() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
-      <CheckCircle2 className="mb-6 h-16 w-16 text-emerald-400" />
+      <CheckCircle2 className="mb-6 h-16 w-16 text-emerald-500" />
       <div className="mb-4 flex items-center justify-center gap-2">
-        <Dumbbell className="h-6 w-6 text-emerald-400" />
+        <Dumbbell className="h-6 w-6 text-slate-300" />
         <h1 className="text-2xl font-bold text-white">Matrícula confirmada!</h1>
       </div>
       <p className="mb-2 text-slate-300">

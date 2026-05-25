@@ -4,16 +4,18 @@ interface StatCardProps {
   title: string;
   value: string;
   icon: LucideIcon;
-  accent?: "emerald" | "blue" | "red";
+  accent?: "red" | "emerald" | "amber" | "sky";
 }
 
+// Mapa de acentos com cores semânticas por contexto do card
 const accents = {
-  emerald: "text-emerald-400 bg-emerald-500/10",
-  blue: "text-blue-400 bg-blue-500/10",
   red: "text-red-400 bg-red-500/10",
+  emerald: "text-emerald-400 bg-emerald-500/10",
+  amber: "text-amber-400 bg-amber-500/10",
+  sky: "text-sky-400 bg-sky-500/10",
 };
 
-export function StatCard({ title, value, icon: Icon, accent = "emerald" }: StatCardProps) {
+export function StatCard({ title, value, icon: Icon, accent = "sky" }: StatCardProps) {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-5">
       <div className="flex items-start justify-between">

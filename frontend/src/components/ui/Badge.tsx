@@ -2,6 +2,7 @@ interface BadgeProps {
   score: number;
 }
 
+// Score com cores semânticas: verde=bom pagador, âmbar=atenção, vermelho=risco
 export function ScoreBadge({ score }: BadgeProps) {
   let color = "bg-red-500/20 text-red-400 border-red-500/30";
   if (score > 80) color = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
@@ -14,6 +15,7 @@ export function ScoreBadge({ score }: BadgeProps) {
   );
 }
 
+// Status com cores padrão: verde=pago/ativo, âmbar=pendente, vermelho=vencido, cinza=cancelado
 export function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     PENDING: "bg-amber-500/20 text-amber-400 border-amber-500/30",

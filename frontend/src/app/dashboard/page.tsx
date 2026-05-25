@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { TrendingUp, Wallet, AlertTriangle, Users } from "lucide-react";
@@ -115,7 +115,7 @@ export default function DashboardPage() {
           title="Alunos ativos"
           value={String(summary.studentsActive ?? 0)}
           icon={Users}
-          accent="emerald"
+          accent="sky"
         />
         <StatCard
           title="Receita assinaturas"
@@ -127,7 +127,7 @@ export default function DashboardPage() {
           title="Total a receber"
           value={formatCurrency(summary.totalToReceive)}
           icon={Wallet}
-          accent="blue"
+          accent="amber"
         />
         <StatCard
           title="Inadimplência"

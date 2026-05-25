@@ -9,6 +9,7 @@ import {
 } from "../../infrastructure/services/AsaasClientService";
 import { AppError } from "../../shared/AppError";
 import { formatWhatsappForEvolution } from "../../shared/formatWhatsapp";
+import { db } from "../../infrastructure/database/connection";
 
 export interface RegisterAndSubscribeDTO {
   email: string;
@@ -51,6 +52,11 @@ export class RegisterAndSubscribeUseCase {
 
     const whatsapp = formatWhatsappForEvolution(dto.whatsapp);
 
+    const existingUser = await db("users").where({ email: dto.email.toLowerCase() }).first();
+    if (existingUser) {
+      throw new AppError("Email já cadastrado como administrador", 409);
+    }
+
     const asaasCustomerId = await this.asaasService.createCustomer({
       name: dto.name,
       cpfCnpj: dto.document,
@@ -66,6 +72,13 @@ export class RegisterAndSubscribeUseCase {
       whatsapp,
       asaas_customer_id: asaasCustomerId,
       status: "PENDING",
+    });
+
+    await db("users").insert({
+      name: dto.name,
+      email: dto.email.toLowerCase(),
+      whatsapp,
+      password_hash: passwordHash,
     });
 
     const asaasResult = await this.asaasService.createSubscriptionWithCard({
