@@ -5,6 +5,13 @@ import { ISubscriptionRepository } from "../../domain/repositories/ISubscription
 
 const PAID_EVENTS = ["PAYMENT_RECEIVED", "PAYMENT_CONFIRMED"];
 const OVERDUE_EVENTS = ["PAYMENT_OVERDUE"];
+const CANCEL_EVENTS = [
+  "SUBSCRIPTION_DELETED",
+  "SUBSCRIPTION_INACTIVATED",
+  "PAYMENT_DELETED",
+  "PAYMENT_REFUNDED",
+  "PAYMENT_CHARGEBACK_REQUESTED",
+];
 
 export class ProcessSubscriptionWebhookUseCase {
   constructor(
@@ -13,6 +20,10 @@ export class ProcessSubscriptionWebhookUseCase {
   ) {}
 
   async execute(payload: AsaasWebhookPayload): Promise<{ processed: boolean }> {
+    if (CANCEL_EVENTS.includes(payload.event)) {
+      return this.handleCancelled(payload);
+    }
+
     if (OVERDUE_EVENTS.includes(payload.event)) {
       return this.handleOverdue(payload);
     }
@@ -45,6 +56,28 @@ export class ProcessSubscriptionWebhookUseCase {
 
     await this.subscriptionRepo.updateStatus(subscription.id, "ACTIVE", new Date());
     await this.studentRepo.updateStatus(subscription.student_id, "ACTIVE");
+
+    return { processed: true };
+  }
+
+  private async handleCancelled(
+    payload: AsaasWebhookPayload
+  ): Promise<{ processed: boolean }> {
+    const paymentId = payload.payment?.id;
+    const subscriptionId =
+      payload.payment?.subscription || payload.subscription?.id;
+
+    if (!paymentId && !subscriptionId) {
+      return { processed: false };
+    }
+
+    const subscription = await this.resolveSubscription(paymentId, subscriptionId);
+    if (!subscription) return { processed: false };
+
+    if (subscription.status === "CANCELLED") return { processed: true };
+
+    await this.subscriptionRepo.updateStatus(subscription.id, "CANCELLED");
+    await this.studentRepo.updateStatus(subscription.student_id, "CANCELLED");
 
     return { processed: true };
   }
