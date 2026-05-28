@@ -1,5 +1,5 @@
-import axios from "axios";
 import { Request, Response, NextFunction } from "express";
+import { AppError } from "../../../shared/AppError";
 import { PLANS, PlanType } from "../../../domain/plans";
 import { GetPaymentStatusUseCase } from "../../../usecases/checkout/GetPaymentStatusUseCase";
 import { RegisterAndSubscribeUseCase } from "../../../usecases/checkout/RegisterAndSubscribeUseCase";
@@ -63,16 +63,13 @@ export class CheckoutController {
 
       res.status(201).json(result);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        const data = err.response.data as {
-          errors?: Array<{ description: string }>;
-        };
-        if (data.errors?.length) {
-          const msg = data.errors.map((e) => e.description).join("; ");
-          const status = err.response.status >= 400 ? err.response.status : 400;
-          res.status(status).json({ success: false, message: msg });
-          return;
-        }
+      if (err instanceof AppError) {
+        res.status(err.statusCode).json({
+          success: false,
+          error: err.message,
+          message: err.message,
+        });
+        return;
       }
       next(err);
     }

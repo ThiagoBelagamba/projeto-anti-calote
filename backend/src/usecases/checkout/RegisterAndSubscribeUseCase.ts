@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { PlanType, getPlan, isValidPlan } from "../../domain/plans";
+import { Student } from "../../domain/entities/Student";
 import { IStudentRepository } from "../../domain/repositories/IStudentRepository";
 import { ISubscriptionRepository } from "../../domain/repositories/ISubscriptionRepository";
 import {
@@ -9,6 +10,7 @@ import {
 } from "../../infrastructure/services/AsaasClientService";
 import { AppError } from "../../shared/AppError";
 import { formatWhatsappForEvolution } from "../../shared/formatWhatsapp";
+import { mapPgUniqueToAppError } from "../../shared/pgErrors";
 import { db } from "../../infrastructure/database/connection";
 
 export interface RegisterAndSubscribeDTO {
@@ -42,43 +44,51 @@ export class RegisterAndSubscribeUseCase {
   async execute(dto: RegisterAndSubscribeDTO): Promise<RegisterAndSubscribeResult> {
     this.validate(dto);
 
-    const existing = await this.studentRepo.findByEmail(dto.email);
-    if (existing) {
-      throw new AppError("Email já cadastrado", 409);
-    }
-
+    const document = dto.document.replace(/\D/g, "");
+    const email = dto.email.toLowerCase().trim();
     const planConfig = getPlan(dto.plan);
     const passwordHash = await bcrypt.hash(dto.password, 10);
-
     const whatsapp = formatWhatsappForEvolution(dto.whatsapp);
 
-    const existingUser = await db("users").where({ email: dto.email.toLowerCase() }).first();
-    if (existingUser) {
-      throw new AppError("Email já cadastrado como administrador", 409);
+    const existingStudent = await this.studentRepo.findByDocumentAndEmail(
+      document,
+      email
+    );
+
+    if (existingStudent) {
+      const blocking = await this.subscriptionRepo.hasBlockingSubscription(
+        existingStudent.id
+      );
+      if (blocking) {
+        throw new AppError(
+          "Já existe uma assinatura ativa para este CPF e e-mail",
+          409
+        );
+      }
+    } else {
+      const existingUser = await db("users").where({ email }).first();
+      if (existingUser) {
+        throw new AppError("Email já cadastrado como administrador", 409);
+      }
     }
 
-    const asaasCustomerId = await this.asaasService.createCustomer({
-      name: dto.name,
-      cpfCnpj: dto.document,
-      email: dto.email,
-      mobilePhone: whatsapp,
-    });
+    const asaasCustomerId =
+      (await this.asaasService.findCustomerByDocument(document)) ??
+      (await this.asaasService.createCustomer({
+        name: dto.name,
+        cpfCnpj: document,
+        email,
+        mobilePhone: whatsapp,
+      }));
 
-    const student = await this.studentRepo.create({
-      name: dto.name,
-      email: dto.email,
-      password_hash: passwordHash,
-      document: dto.document.replace(/\D/g, ""),
+    const student = await this.resolveStudent({
+      existingStudent,
+      dto,
+      document,
+      email,
+      passwordHash,
       whatsapp,
-      asaas_customer_id: asaasCustomerId,
-      status: "PENDING",
-    });
-
-    await db("users").insert({
-      name: dto.name,
-      email: dto.email.toLowerCase(),
-      whatsapp,
-      password_hash: passwordHash,
+      asaasCustomerId,
     });
 
     const asaasResult = await this.asaasService.createSubscriptionWithCard({
@@ -120,6 +130,76 @@ export class RegisterAndSubscribeUseCase {
       invoice_url: asaasResult.invoiceUrl,
       status: subscription.status,
     };
+  }
+
+  private async resolveStudent(params: {
+    existingStudent: Student | null;
+    dto: RegisterAndSubscribeDTO;
+    document: string;
+    email: string;
+    passwordHash: string;
+    whatsapp: string;
+    asaasCustomerId: string;
+  }): Promise<Student> {
+    const { existingStudent, dto, document, email, passwordHash, whatsapp, asaasCustomerId } =
+      params;
+
+    if (existingStudent) {
+      await this.studentRepo.updateOnCheckout(existingStudent.id, {
+        password_hash: passwordHash,
+        whatsapp,
+        asaas_customer_id: asaasCustomerId,
+        name: dto.name,
+      });
+
+      await this.upsertUser(email, dto.name, whatsapp, passwordHash);
+
+      return { ...existingStudent, whatsapp, asaas_customer_id: asaasCustomerId };
+    }
+
+    const student = await this.studentRepo.create({
+      name: dto.name,
+      email,
+      password_hash: passwordHash,
+      document,
+      whatsapp,
+      asaas_customer_id: asaasCustomerId,
+      status: "PENDING",
+    });
+
+    await this.upsertUser(email, dto.name, whatsapp, passwordHash);
+
+    return student;
+  }
+
+  private async upsertUser(
+    email: string,
+    name: string,
+    whatsapp: string,
+    passwordHash: string
+  ): Promise<void> {
+    const existingUser = await db("users").where({ email }).first();
+    if (existingUser) {
+      await db("users").where({ email }).update({
+        password_hash: passwordHash,
+        name,
+        whatsapp,
+      });
+      return;
+    }
+
+    try {
+      await db("users").insert({
+        name,
+        email,
+        whatsapp,
+        password_hash: passwordHash,
+      });
+    } catch (err) {
+      const mapped = mapPgUniqueToAppError(err);
+      if (mapped) throw mapped;
+      throw err;
+    }
   }
 
   private validate(dto: RegisterAndSubscribeDTO): void {

@@ -15,6 +15,7 @@ export interface ISubscriptionRepository {
   findByAsaasPaymentId(asaasPaymentId: string): Promise<Subscription | null>;
   findByAsaasSubscriptionId(asaasSubscriptionId: string): Promise<Subscription | null>;
   findByStudentId(studentId: string): Promise<Subscription | null>;
+  hasBlockingSubscription(studentId: string): Promise<boolean>;
   updateStatus(id: string, status: SubscriptionStatus, activatedAt?: Date): Promise<void>;
   updateAsaasPaymentId(id: string, asaasPaymentId: string): Promise<void>;
 }

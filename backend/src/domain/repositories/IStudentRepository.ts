@@ -23,11 +23,20 @@ export interface StudentListItem {
   subscription_value: number | null;
 }
 
+export interface UpdateStudentOnCheckoutInput {
+  password_hash: string;
+  whatsapp: string;
+  asaas_customer_id?: string | null;
+  name?: string;
+}
+
 export interface IStudentRepository {
   findByEmail(email: string): Promise<Student | null>;
+  findByDocumentAndEmail(document: string, email: string): Promise<Student | null>;
   findById(id: string): Promise<Student | null>;
   findAllWithSubscriptions(): Promise<StudentListItem[]>;
   create(data: CreateStudentInput): Promise<Student>;
+  updateOnCheckout(id: string, data: UpdateStudentOnCheckoutInput): Promise<void>;
   updateStatus(id: string, status: StudentStatus): Promise<void>;
   updateAsaasCustomerId(id: string, asaasCustomerId: string): Promise<void>;
 }

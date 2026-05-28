@@ -3,12 +3,24 @@ import {
   CreateStudentInput,
   IStudentRepository,
   StudentListItem,
+  UpdateStudentOnCheckoutInput,
 } from "../../../domain/repositories/IStudentRepository";
+import { mapPgUniqueToAppError } from "../../../shared/pgErrors";
 import { db } from "../connection";
 
 export class PgStudentRepository implements IStudentRepository {
   async findByEmail(email: string): Promise<Student | null> {
     const row = await db("students").where({ email: email.toLowerCase() }).first();
+    return row || null;
+  }
+
+  async findByDocumentAndEmail(
+    document: string,
+    email: string
+  ): Promise<Student | null> {
+    const row = await db("students")
+      .where({ document, email: email.toLowerCase() })
+      .first();
     return row || null;
   }
 
@@ -45,18 +57,36 @@ export class PgStudentRepository implements IStudentRepository {
   }
 
   async create(data: CreateStudentInput): Promise<Student> {
-    const [row] = await db("students")
-      .insert({
-        name: data.name,
-        email: data.email.toLowerCase(),
-        password_hash: data.password_hash,
-        document: data.document,
-        whatsapp: data.whatsapp,
-        asaas_customer_id: data.asaas_customer_id ?? null,
-        status: data.status || "PENDING",
-      })
-      .returning("*");
-    return row;
+    try {
+      const [row] = await db("students")
+        .insert({
+          name: data.name,
+          email: data.email.toLowerCase(),
+          password_hash: data.password_hash,
+          document: data.document,
+          whatsapp: data.whatsapp,
+          asaas_customer_id: data.asaas_customer_id ?? null,
+          status: data.status || "PENDING",
+        })
+        .returning("*");
+      return row;
+    } catch (err) {
+      const mapped = mapPgUniqueToAppError(err);
+      if (mapped) throw mapped;
+      throw err;
+    }
+  }
+
+  async updateOnCheckout(id: string, data: UpdateStudentOnCheckoutInput): Promise<void> {
+    const update: Record<string, unknown> = {
+      password_hash: data.password_hash,
+      whatsapp: data.whatsapp,
+    };
+    if (data.asaas_customer_id !== undefined) {
+      update.asaas_customer_id = data.asaas_customer_id;
+    }
+    if (data.name) update.name = data.name;
+    await db("students").where({ id }).update(update);
   }
 
   async updateStatus(id: string, status: StudentStatus): Promise<void> {

@@ -40,6 +40,14 @@ export class PgSubscriptionRepository implements ISubscriptionRepository {
     return row ? { ...row, value: parseFloat(String(row.value)) } : null;
   }
 
+  async hasBlockingSubscription(studentId: string): Promise<boolean> {
+    const row = await db("subscriptions")
+      .where({ student_id: studentId })
+      .whereIn("status", ["PENDING", "ACTIVE", "OVERDUE"])
+      .first();
+    return !!row;
+  }
+
   async updateStatus(
     id: string,
     status: SubscriptionStatus,

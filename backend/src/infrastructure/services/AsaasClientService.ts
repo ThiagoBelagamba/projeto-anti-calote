@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { env } from "../../config/env";
+import { parseAsaasAxiosError } from "../../shared/asaasErrors";
 
 export interface CreateCustomerParams {
   name: string;
@@ -17,6 +18,11 @@ export interface CreatePixChargeParams {
 
 export interface AsaasCustomerResponse {
   id: string;
+  deleted?: boolean;
+}
+
+export interface AsaasCustomerListResponse {
+  data: AsaasCustomerResponse[];
 }
 
 export interface AsaasPaymentResponse {
@@ -79,14 +85,34 @@ export class AsaasClientService {
     });
   }
 
+  async findCustomerByDocument(cpfCnpj: string): Promise<string | null> {
+    try {
+      const digits = cpfCnpj.replace(/\D/g, "");
+      const { data } = await this.client.get<AsaasCustomerListResponse>("/customers", {
+        params: { cpfCnpj: digits, limit: 1 },
+      });
+      const customer = data.data?.[0];
+      if (customer?.id && !customer.deleted) {
+        return customer.id;
+      }
+      return null;
+    } catch (err) {
+      throw parseAsaasAxiosError(err);
+    }
+  }
+
   async createCustomer(params: CreateCustomerParams): Promise<string> {
-    const { data } = await this.client.post<AsaasCustomerResponse>("/customers", {
-      name: params.name,
-      cpfCnpj: params.cpfCnpj.replace(/\D/g, ""),
-      email: params.email,
-      mobilePhone: params.mobilePhone?.replace(/\D/g, ""),
-    });
-    return data.id;
+    try {
+      const { data } = await this.client.post<AsaasCustomerResponse>("/customers", {
+        name: params.name,
+        cpfCnpj: params.cpfCnpj.replace(/\D/g, ""),
+        email: params.email,
+        mobilePhone: params.mobilePhone?.replace(/\D/g, ""),
+      });
+      return data.id;
+    } catch (err) {
+      throw parseAsaasAxiosError(err);
+    }
   }
 
   async createPixCharge(params: CreatePixChargeParams): Promise<{
@@ -176,6 +202,21 @@ export class AsaasClientService {
   }
 
   async createSubscriptionWithCard(params: CreateSubscriptionParams): Promise<{
+    subscriptionId: string;
+    paymentId: string | null;
+    status: string;
+    invoiceUrl?: string;
+  }> {
+    try {
+      return await this.createSubscriptionWithCardInternal(params);
+    } catch (err) {
+      throw parseAsaasAxiosError(err);
+    }
+  }
+
+  private async createSubscriptionWithCardInternal(
+    params: CreateSubscriptionParams
+  ): Promise<{
     subscriptionId: string;
     paymentId: string | null;
     status: string;
