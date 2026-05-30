@@ -9,7 +9,7 @@ export function LeadForm() {
     name: "",
     email: "",
     whatsapp: "",
-    gym_name: "",
+    company_name: "", // Nome da empresa contratante
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -18,9 +18,10 @@ export function LeadForm() {
     e.preventDefault();
     setLoading(true);
     try {
+      // Envia lead da empresa para o backend
       await api.post("/leads", formData);
       setSuccess(true);
-      setFormData({ name: "", email: "", whatsapp: "", gym_name: "" });
+      setFormData({ name: "", email: "", whatsapp: "", company_name: "" });
     } catch (err) {
       alert("Ocorreu um erro ao enviar seus dados. Tente novamente.");
     } finally {
@@ -35,10 +36,10 @@ export function LeadForm() {
           <div className="bg-gradient-to-br from-slate-900 to-black rounded-3xl p-8 md:p-12 shadow-2xl border border-red-900/50">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-black text-white tracking-tight uppercase">
-                Pronto para transformar sua Academia?
+                Pronto para acabar com a inadimplência?
               </h2>
               <p className="mt-4 text-slate-400 text-lg">
-                Preencha os dados abaixo e um de nossos especialistas entrará em contato para liberar seu acesso.
+                Preencha os dados abaixo e um especialista entrará em contato para ativar sua conta empresarial.
               </p>
             </div>
 
@@ -71,7 +72,7 @@ export function LeadForm() {
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2 uppercase tracking-wider text-xs">
-                      Seu E-mail
+                      E-mail Corporativo
                     </label>
                     <input
                       type="email"
@@ -80,7 +81,7 @@ export function LeadForm() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
-                      placeholder="joao@academia.com"
+                      placeholder="joao@suaempresa.com.br"
                     />
                   </div>
                   <div>
@@ -98,17 +99,17 @@ export function LeadForm() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="gym_name" className="block text-sm font-medium text-slate-300 mb-2 uppercase tracking-wider text-xs">
-                      Nome da Academia
+                    <label htmlFor="company_name" className="block text-sm font-medium text-slate-300 mb-2 uppercase tracking-wider text-xs">
+                      Nome da Empresa
                     </label>
                     <input
                       type="text"
-                      id="gym_name"
+                      id="company_name"
                       required
-                      value={formData.gym_name}
-                      onChange={(e) => setFormData({ ...formData, gym_name: e.target.value })}
+                      value={formData.company_name}
+                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
                       className="w-full bg-slate-950 border border-slate-800 rounded-md px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all"
-                      placeholder="Academia Super Forma"
+                      placeholder="Empresa Ltda."
                     />
                   </div>
                 </div>
@@ -118,7 +119,7 @@ export function LeadForm() {
                     disabled={loading}
                     className="inline-flex items-center justify-center px-10 py-4 text-lg font-bold rounded-md text-white bg-red-600 hover:bg-red-700 uppercase tracking-wide transition-all transform hover:scale-105 disabled:opacity-50 disabled:transform-none"
                   >
-                    {loading ? "Enviando..." : "Quero Conhecer"}
+                    {loading ? "Enviando..." : "Quero Contratar"}
                   </button>
                 </div>
               </form>

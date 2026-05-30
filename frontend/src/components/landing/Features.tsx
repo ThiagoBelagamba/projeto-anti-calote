@@ -1,27 +1,37 @@
 import { Reveal } from "../ui/Reveal";
-import { DollarSign, MessageCircle, ShieldCheck, Zap } from "lucide-react";
+import { DollarSign, MessageCircle, ShieldCheck, Zap, BarChart3, Building2 } from "lucide-react";
 
 export function Features() {
   const features = [
     {
       name: "Cobrança Automática",
-      description: "Mensagens programadas via WhatsApp para lembrar seus alunos antes, no dia e depois do vencimento.",
+      description: "Mensagens programadas via WhatsApp para lembrar seus clientes antes, no dia e depois do vencimento. Sem esforço manual.",
       icon: MessageCircle,
     },
     {
       name: "Pagamentos em 1 Clique",
-      description: "Integração nativa com PIX. O aluno recebe o código copia e cola no próprio WhatsApp.",
+      description: "Integração nativa com PIX e boleto. O cliente recebe o código copia e cola direto no WhatsApp.",
       icon: Zap,
     },
     {
       name: "Dashboard Financeiro",
-      description: "Acompanhe tudo em tempo real: recebidos, a receber e inadimplentes, em um painel claro e direto.",
+      description: "Acompanhe em tempo real: recebidos, a receber e inadimplentes, em um painel claro, direto e completo.",
       icon: DollarSign,
     },
     {
       name: "Bloqueio Inteligente",
-      description: "Configurou a regra? Se o aluno não pagar, o status atualiza automaticamente para bloqueado.",
+      description: "Definiu a régua? Se o cliente não pagar, o status atualiza automaticamente para inadimplente e bloqueia o acesso.",
       icon: ShieldCheck,
+    },
+    {
+      name: "Relatórios Gerenciais",
+      description: "Relatórios detalhados de inadimplência, taxa de recuperação e fluxo de caixa para tomada de decisão estratégica.",
+      icon: BarChart3,
+    },
+    {
+      name: "Multi-empresa",
+      description: "Gerencie múltiplos CNPJs e unidades em uma única plataforma. Ideal para grupos empresariais e franquias.",
+      icon: Building2,
     },
   ];
 
@@ -31,16 +41,16 @@ export function Features() {
         <Reveal>
           <div className="text-center">
             <h2 className="text-3xl font-black text-white tracking-tight uppercase sm:text-4xl">
-              Tudo que você precisa
+              Tudo que sua empresa precisa
             </h2>
             <p className="mt-4 max-w-2xl text-xl text-slate-400 mx-auto">
-              Desenvolvido para donos de academia que não têm tempo a perder.
+              Desenvolvido para gestores que não têm tempo a perder com inadimplência.
             </p>
           </div>
         </Reveal>
 
         <div className="mt-20">
-          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => (
               <Reveal key={feature.name} delay={index * 100} direction="up">
                 <div className="pt-6">

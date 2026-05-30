@@ -13,10 +13,10 @@ export function Pricing() {
         <Reveal>
           <div className="text-center mb-10">
             <h2 className="text-3xl font-black text-white tracking-tight uppercase sm:text-4xl">
-              Acesso Exclusivo
+              Planos e Preços
             </h2>
             <p className="mt-4 max-w-2xl text-xl text-slate-400 mx-auto">
-              Preço transparente, sem surpresas, para que você foque no crescimento.
+              Preço transparente, sem surpresas. Foque no crescimento da sua empresa.
             </p>
           </div>
         </Reveal>
@@ -71,10 +71,11 @@ export function Pricing() {
             <div className="px-6 pt-6 pb-8 sm:px-10 sm:pt-6 sm:pb-10">
               <ul className="space-y-4">
                 {[
-                  "Alunos Ilimitados",
+                  "Clientes Ilimitados",
                   "Cobranças Automáticas via WhatsApp",
-                  "Dashboard Financeiro",
-                  "Integração PIX",
+                  "Dashboard Financeiro Completo",
+                  "Integração PIX e Boleto",
+                  "Relatórios Gerenciais",
                   "Suporte Prioritário",
                 ].map((feature, index) => (
                   <li key={index} className="flex items-start">
@@ -92,7 +93,7 @@ export function Pricing() {
                   href="/assinar"
                   className="block w-full text-center px-6 py-4 rounded-md shadow bg-red-600 text-white font-bold uppercase tracking-wide hover:bg-red-700 transition-colors"
                 >
-                  Garantir Minha Vaga
+                  Contratar Agora
                 </Link>
               </div>
             </div>

@@ -10,7 +10,7 @@ export function Footer() {
               Anti<span className="text-red-600">Calote</span>
             </Link>
             <p className="text-slate-400 max-w-sm mt-4">
-              O sistema de gestão feito de dono para dono. Simplifique suas cobranças e acabe com a inadimplência na sua academia.
+              A plataforma de gestão de cobranças que empresas contratam para eliminar a inadimplência e automatizar o recebimento de clientes.
             </p>
           </div>
           <div>
@@ -42,7 +42,7 @@ export function Footer() {
             &copy; {new Date().getFullYear()} AntiCalote. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <span className="text-slate-500 text-sm">Feito para acelerar o seu negócio.</span>
+            <span className="text-slate-500 text-sm">Gestão de cobranças para empresas que levam o financeiro a sério.</span>
           </div>
         </div>
       </div>

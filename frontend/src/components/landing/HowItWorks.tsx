@@ -4,18 +4,18 @@ export function HowItWorks() {
   const steps = [
     {
       id: "01",
-      title: "Cadastre seus Alunos",
-      description: "Importe sua lista ou cadastre manualmente. Nós geramos o link de pagamento único para cada um.",
+      title: "Contrate e Cadastre",
+      description: "Sua empresa contrata o ANTI CALOTE. Importe a base de clientes ou cadastre manualmente. Em minutos, tudo configurado.",
     },
     {
       id: "02",
-      title: "Defina a Régua de Cobrança",
-      description: "Escolha quantos dias antes e depois do vencimento o aluno deve ser lembrado pelo WhatsApp.",
+      title: "Configure a Régua de Cobrança",
+      description: "Defina quantos dias antes e depois do vencimento cada cliente deve ser lembrado via WhatsApp. Automático e personalizado.",
     },
     {
       id: "03",
-      title: "Acompanhe os Recebimentos",
-      description: "O aluno paga, o sistema dá baixa automática, libera o acesso e o dinheiro cai na sua conta.",
+      title: "Receba e Cresça",
+      description: "O cliente paga, o sistema registra automaticamente, e o dinheiro cai na conta da sua empresa. Zero trabalho manual.",
     },
   ];
 
@@ -27,6 +27,9 @@ export function HowItWorks() {
             <h2 className="text-3xl font-black text-white tracking-tight uppercase sm:text-4xl">
               Como Funciona
             </h2>
+            <p className="mt-4 max-w-2xl text-lg text-slate-400 mx-auto">
+              Do contrato ao primeiro recebimento em menos de 24 horas.
+            </p>
           </div>
         </Reveal>
 
