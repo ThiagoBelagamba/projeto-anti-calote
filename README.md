@@ -27,14 +27,14 @@ cd frontend && npm install && npm run dev
 | O quê | URL |
 |-------|-----|
 | Dashboard | http://localhost:3001 |
-| Checkout academia | http://localhost:3001/assinar |
+| Checkout Anti Calote | http://localhost:3001/assinar |
 | API | http://localhost:3333/api |
 | Evolution API | http://localhost:8080 |
 
 ## Funcionalidades
 
 - **Clientes e cobranças PIX** — régua D-1, D-0, D+1… com link de fatura (sem PIX no texto)
-- **Lembrete manual** — botão na tela de Cobranças (avulsas e assinaturas da academia)
+- **Lembrete manual** — botão na tela de Cobranças (avulsas e assinaturas do Anti Calote)
 - **Checkout `/assinar`** — planos mensal R$ 180 / anual R$ 1.800 (cartão, Asaas sandbox)
 - **Webhooks** — confirma pagamento e ativa alunos no dashboard
 

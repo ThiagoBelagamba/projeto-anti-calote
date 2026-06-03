@@ -15,6 +15,8 @@ export const env = {
     process.env.DEFAULT_USER_ID || "00000000-0000-4000-8000-000000000001",
   asaasApiKey: process.env.ASAAS_API_KEY || "",
   asaasApiUrl: process.env.ASAAS_API_URL || "https://sandbox.asaas.com/api/v3",
+  isAsaasSandbox: (process.env.ASAAS_API_URL || "https://sandbox.asaas.com/api/v3")
+    .includes("sandbox"),
   asaasWebhookToken: process.env.ASAAS_WEBHOOK_TOKEN || "",
   asaasWebhookSkipVerify:
     process.env.ASAAS_WEBHOOK_SKIP_VERIFY === "true" &&

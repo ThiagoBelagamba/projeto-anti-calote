@@ -52,13 +52,17 @@ export interface CreditCardHolderInfoInput {
   phone: string;
 }
 
-export interface CreateSubscriptionParams {
+export interface CreateSubscriptionBaseParams {
   customerId: string;
   value: number;
   cycle: "MONTHLY" | "YEARLY";
   description: string;
+}
+
+export interface CreateSubscriptionParams extends CreateSubscriptionBaseParams {
   creditCard: CreditCardInput;
   creditCardHolderInfo: CreditCardHolderInfoInput;
+  remoteIp: string;
 }
 
 export interface AsaasSubscriptionResponse {
@@ -78,6 +82,7 @@ export class AsaasClientService {
   constructor() {
     this.client = axios.create({
       baseURL: env.asaasApiUrl,
+      timeout: 60_000,
       headers: {
         access_token: env.asaasApiKey,
         "Content-Type": "application/json",
@@ -208,50 +213,82 @@ export class AsaasClientService {
     invoiceUrl?: string;
   }> {
     try {
-      return await this.createSubscriptionWithCardInternal(params);
+      const phone = params.creditCardHolderInfo.phone.replace(/\D/g, "");
+      const { data } = await this.client.post<AsaasSubscriptionResponse>("/subscriptions", {
+        customer: params.customerId,
+        billingType: "CREDIT_CARD",
+        value: params.value,
+        cycle: params.cycle,
+        description: params.description,
+        notifyPaymentCreatedImmediately: true,
+        nextDueDate: new Date().toISOString().slice(0, 10),
+        remoteIp: params.remoteIp,
+        creditCard: {
+          holderName: params.creditCard.holderName,
+          number: params.creditCard.number.replace(/\s/g, ""),
+          expiryMonth: params.creditCard.expiryMonth,
+          expiryYear: params.creditCard.expiryYear,
+          ccv: params.creditCard.ccv,
+        },
+        creditCardHolderInfo: {
+          name: params.creditCardHolderInfo.name,
+          email: params.creditCardHolderInfo.email,
+          cpfCnpj: params.creditCardHolderInfo.cpfCnpj.replace(/\D/g, ""),
+          postalCode: params.creditCardHolderInfo.postalCode.replace(/\D/g, ""),
+          addressNumber: params.creditCardHolderInfo.addressNumber,
+          phone,
+          mobilePhone: phone,
+        },
+      });
+
+      return this.buildSubscriptionResult(data.id, data.status);
     } catch (err) {
       throw parseAsaasAxiosError(err);
     }
   }
 
-  private async createSubscriptionWithCardInternal(
-    params: CreateSubscriptionParams
+  async createSubscriptionViaInvoice(
+    params: CreateSubscriptionBaseParams
   ): Promise<{
     subscriptionId: string;
     paymentId: string | null;
     status: string;
     invoiceUrl?: string;
   }> {
-    const { data } = await this.client.post<AsaasSubscriptionResponse>("/subscriptions", {
-      customer: params.customerId,
-      billingType: "CREDIT_CARD",
-      value: params.value,
-      cycle: params.cycle,
-      description: params.description,
-      creditCard: {
-        holderName: params.creditCard.holderName,
-        number: params.creditCard.number.replace(/\s/g, ""),
-        expiryMonth: params.creditCard.expiryMonth,
-        expiryYear: params.creditCard.expiryYear,
-        ccv: params.creditCard.ccv,
-      },
-      creditCardHolderInfo: {
-        name: params.creditCardHolderInfo.name,
-        email: params.creditCardHolderInfo.email,
-        cpfCnpj: params.creditCardHolderInfo.cpfCnpj.replace(/\D/g, ""),
-        postalCode: params.creditCardHolderInfo.postalCode.replace(/\D/g, ""),
-        addressNumber: params.creditCardHolderInfo.addressNumber,
-        phone: params.creditCardHolderInfo.phone.replace(/\D/g, ""),
-      },
-    });
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await this.client.post<AsaasSubscriptionResponse>("/subscriptions", {
+        customer: params.customerId,
+        billingType: "CREDIT_CARD",
+        value: params.value,
+        cycle: params.cycle,
+        description: params.description,
+        nextDueDate: today,
+        notifyPaymentCreatedImmediately: true,
+      });
 
+      return this.buildSubscriptionResult(data.id, data.status);
+    } catch (err) {
+      throw parseAsaasAxiosError(err);
+    }
+  }
+
+  private async buildSubscriptionResult(
+    subscriptionId: string,
+    status: string
+  ): Promise<{
+    subscriptionId: string;
+    paymentId: string | null;
+    status: string;
+    invoiceUrl?: string;
+  }> {
     let paymentId: string | null = null;
     let invoiceUrl: string | undefined;
 
     try {
       const paymentsRes = await this.client.get<{ data: AsaasPaymentResponse[] }>(
         "/payments",
-        { params: { subscription: data.id, limit: 1 } }
+        { params: { subscription: subscriptionId, limit: 1 } }
       );
       const firstPayment = paymentsRes.data.data?.[0];
       if (firstPayment) {
@@ -263,11 +300,43 @@ export class AsaasClientService {
     }
 
     return {
-      subscriptionId: data.id,
+      subscriptionId,
       paymentId,
-      status: data.status,
+      status,
       invoiceUrl,
     };
+  }
+
+  async payPendingPaymentWithCard(
+    paymentId: string,
+    creditCard: CreditCardInput,
+    creditCardHolderInfo: CreditCardHolderInfoInput,
+    remoteIp: string
+  ): Promise<void> {
+    try {
+      const phone = creditCardHolderInfo.phone.replace(/\D/g, "");
+      await this.client.post(`/payments/${paymentId}/payWithCreditCard`, {
+        remoteIp,
+        creditCard: {
+          holderName: creditCard.holderName,
+          number: creditCard.number.replace(/\s/g, ""),
+          expiryMonth: creditCard.expiryMonth,
+          expiryYear: creditCard.expiryYear,
+          ccv: creditCard.ccv,
+        },
+        creditCardHolderInfo: {
+          name: creditCardHolderInfo.name,
+          email: creditCardHolderInfo.email,
+          cpfCnpj: creditCardHolderInfo.cpfCnpj.replace(/\D/g, ""),
+          postalCode: creditCardHolderInfo.postalCode.replace(/\D/g, ""),
+          addressNumber: creditCardHolderInfo.addressNumber,
+          phone,
+          mobilePhone: phone,
+        },
+      });
+    } catch (err) {
+      throw parseAsaasAxiosError(err);
+    }
   }
 
   async getPaymentStatus(paymentId: string): Promise<{

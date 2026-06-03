@@ -107,7 +107,7 @@ export default function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-slate-400">Cobranças e assinaturas da academia</p>
+        <p className="text-slate-400">Cobranças e assinaturas do Anti Calote</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

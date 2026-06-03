@@ -10,7 +10,7 @@ export function Footer() {
               Anti<span className="text-red-600">Calote</span>
             </Link>
             <p className="text-slate-400 max-w-sm mt-4">
-              O sistema de gestão feito de dono para dono. Simplifique suas cobranças e acabe com a inadimplência na sua academia.
+              O sistema de gestão feito de dono para dono. Simplifique suas cobranças e acabe com a inadimplência com o Anti Calote.
             </p>
           </div>
           <div>

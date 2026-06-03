@@ -34,7 +34,7 @@ export function Features() {
               Tudo que você precisa
             </h2>
             <p className="mt-4 max-w-2xl text-xl text-slate-400 mx-auto">
-              Desenvolvido para donos de academia que não têm tempo a perder.
+              Desenvolvido para quem usa o Anti Calote e não tem tempo a perder.
             </p>
           </div>
         </Reveal>

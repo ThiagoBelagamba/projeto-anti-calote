@@ -110,6 +110,10 @@ function AssinarForm() {
 
       if (result.success) {
         const planoParam = form.plan === "monthly" ? "mensal" : "anual";
+        if (result.payment_redirect && result.invoice_url) {
+          window.location.href = result.invoice_url;
+          return;
+        }
         router.push(`/obrigado?plano=${planoParam}`);
       } else {
         setError(result.message || "Erro ao processar assinatura");

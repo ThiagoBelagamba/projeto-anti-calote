@@ -5,13 +5,13 @@ export const PLANS = {
     value: Number(process.env.PLAN_MONTHLY_VALUE) || 180,
     cycle: "MONTHLY" as const,
     label: "Mensal",
-    description: "Plano Mensal Academia",
+    description: "Plano Mensal Anti Calote",
   },
   annual: {
     value: Number(process.env.PLAN_ANNUAL_VALUE) || 1800,
     cycle: "YEARLY" as const,
     label: "Anual",
-    description: "Plano Anual Academia",
+    description: "Plano Anual Anti Calote",
   },
 } as const;
 

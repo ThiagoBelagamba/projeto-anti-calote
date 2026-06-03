@@ -39,6 +39,7 @@ export interface CheckoutResponse {
   asaas_subscription_id?: string;
   invoice_url?: string;
   status?: string;
+  payment_redirect?: boolean;
   message?: string;
 }
 

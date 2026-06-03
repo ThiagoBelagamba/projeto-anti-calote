@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../../shared/AppError";
+import { getClientIp } from "../../../shared/clientIp";
 import { PLANS, PlanType } from "../../../domain/plans";
 import { GetPaymentStatusUseCase } from "../../../usecases/checkout/GetPaymentStatusUseCase";
 import { RegisterAndSubscribeUseCase } from "../../../usecases/checkout/RegisterAndSubscribeUseCase";
@@ -59,6 +60,7 @@ export class CheckoutController {
         plan: selectedPlan,
         credit_card,
         credit_card_holder_info,
+        remoteIp: getClientIp(req),
       });
 
       res.status(201).json(result);

@@ -10,7 +10,7 @@ export function Hero() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
         <Reveal>
           <div className="inline-block border border-red-600/30 bg-red-600/10 text-red-500 uppercase tracking-widest text-xs font-bold px-4 py-1.5 rounded-full mb-8">
-            Sistema de Gestão para Academias
+            Sistema Anti Calote
           </div>
         </Reveal>
 

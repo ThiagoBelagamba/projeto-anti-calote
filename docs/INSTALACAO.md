@@ -7,7 +7,7 @@ Documentação para rodar o projeto no computador de cada integrante da turma (W
 Sistema de cobrança com:
 
 - **Dashboard admin** — clientes, cobranças PIX avulsas, régua automática no WhatsApp
-- **Checkout academia** — matrícula em `/assinar` (planos mensal/anual no cartão)
+- **Checkout Anti Calote** — matrícula em `/assinar` (planos mensal/anual no cartão)
 - **Integrações** — Asaas (pagamentos) + Evolution API (WhatsApp)
 
 ## Pré-requisitos
@@ -169,7 +169,7 @@ Abra: **http://localhost:3001**
 | Dashboard | http://localhost:3001 |
 | Cobranças | http://localhost:3001/cobrancas |
 | Clientes | http://localhost:3001/clientes |
-| Checkout academia | http://localhost:3001/assinar |
+| Checkout Anti Calote | http://localhost:3001/assinar |
 
 ---
 
@@ -246,7 +246,7 @@ Reinicie o backend após alterar o `.env`.
 3. Em **Cobranças avulsas** → **Enviar lembrete** (manda link da fatura, sem PIX copia e cola no texto)
 4. Pague no sandbox ou simule webhook → status **Pago**
 
-### B) Matrícula academia (`/assinar`)
+### B) Matrícula Anti Calote (`/assinar`)
 
 1. Abra http://localhost:3001/assinar
 2. Preencha o formulário com **cartão de teste** do Asaas
@@ -254,12 +254,13 @@ Reinicie o backend após alterar o `.env`.
 4. Dashboard → seção **Alunos matriculados**
 5. **Cobranças** → assinaturas → **Enviar lembrete** (se pendente/vencido)
 
-**Cartão sandbox (exemplo — confira a doc atual do Asaas):**
+**Cartão sandbox (doc atual do Asaas):**
 
-- Número: `5162306219378829`
-- Validade: `12/30`
+- Número: `4444 4444 4444 4444`
+- Validade: qualquer mês/ano futuro (ex.: `12/30`)
 - CVV: `123`
-- Nome: qualquer nome no cartão
+
+> Se a captura direta falhar no sandbox, o sistema tenta cobrar via API (`payWithCreditCard`) e, em último caso, abre a **fatura do Asaas** — onde o pagamento aparece como **Confirmada** (cartão), não como recebido em dinheiro.
 
 **Erros no checkout:** leia a mensagem na tela (ex.: email já cadastrado, cartão recusado). Não use o mesmo email/CPF de um colega se ele já assinou.
 

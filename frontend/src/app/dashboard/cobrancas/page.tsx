@@ -117,7 +117,7 @@ export default function CobrancasPage() {
         <>
         <div>
           <h2 className="mb-4 text-lg font-semibold text-white">
-            Assinaturas da academia
+            Assinaturas do Anti Calote
           </h2>
           <DataTable
             data={students}

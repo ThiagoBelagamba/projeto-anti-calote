@@ -47,7 +47,7 @@ export class SendSubscriptionReminderUseCase {
         : PLANS.monthly.label;
 
     const text = [
-      "📋 Lembrete — mensalidade da academia",
+      "📋 Lembrete — mensalidade no Anti Calote",
       "",
       `Olá, ${student.name.split(" ")[0]}!`,
       `Plano: ${planLabel}`,

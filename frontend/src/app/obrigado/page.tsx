@@ -22,7 +22,7 @@ function ObrigadoContent() {
         Sua assinatura <strong className="text-white">{planoLabel}</strong> foi registrada com sucesso.
       </p>
       <p className="mb-8 text-sm text-slate-500">
-        O pagamento está sendo processado. Em breve você receberá um e-mail com os detalhes de acesso à academia.
+        O pagamento está sendo processado. Em breve você receberá um e-mail com os detalhes de acesso ao Anti Calote.
       </p>
       <Link href="/">
         <Button>Ir para o painel</Button>

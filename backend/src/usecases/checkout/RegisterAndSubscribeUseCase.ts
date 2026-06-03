@@ -9,6 +9,8 @@ import {
   CreditCardInput,
 } from "../../infrastructure/services/AsaasClientService";
 import { AppError } from "../../shared/AppError";
+import { isCardAuthorizationError } from "../../shared/asaasCardErrors";
+import { env } from "../../config/env";
 import { formatWhatsappForEvolution } from "../../shared/formatWhatsapp";
 import { mapPgUniqueToAppError } from "../../shared/pgErrors";
 import { db } from "../../infrastructure/database/connection";
@@ -22,6 +24,7 @@ export interface RegisterAndSubscribeDTO {
   plan: PlanType;
   credit_card: CreditCardInput;
   credit_card_holder_info: CreditCardHolderInfoInput;
+  remoteIp: string;
 }
 
 export interface RegisterAndSubscribeResult {
@@ -32,6 +35,7 @@ export interface RegisterAndSubscribeResult {
   asaas_subscription_id: string;
   invoice_url?: string;
   status: string;
+  payment_redirect?: boolean;
 }
 
 export class RegisterAndSubscribeUseCase {
@@ -91,17 +95,13 @@ export class RegisterAndSubscribeUseCase {
       asaasCustomerId,
     });
 
-    const asaasResult = await this.asaasService.createSubscriptionWithCard({
+    const asaasResult = await this.createAsaasSubscription({
       customerId: asaasCustomerId,
-      value: planConfig.value,
-      cycle: planConfig.cycle,
-      description: planConfig.description,
-      creditCard: dto.credit_card,
-      creditCardHolderInfo: dto.credit_card_holder_info,
+      planConfig,
+      dto,
     });
 
-    const isActive =
-      asaasResult.status === "ACTIVE" || asaasResult.status === "CONFIRMED";
+    const isActive = await this.isSubscriptionPaid(asaasResult);
 
     const subscription = await this.subscriptionRepo.create({
       student_id: student.id,
@@ -129,7 +129,76 @@ export class RegisterAndSubscribeUseCase {
       asaas_subscription_id: asaasResult.subscriptionId,
       invoice_url: asaasResult.invoiceUrl,
       status: subscription.status,
+      payment_redirect: asaasResult.paymentRedirect,
     };
+  }
+
+  private async isSubscriptionPaid(asaasResult: {
+    paymentId: string | null;
+    status: string;
+  }): Promise<boolean> {
+    if (!asaasResult.paymentId) {
+      return asaasResult.status === "ACTIVE";
+    }
+
+    const paymentStatus = await this.asaasService.getPaymentStatus(asaasResult.paymentId);
+    return paymentStatus.confirmed;
+  }
+
+  private async createAsaasSubscription(params: {
+    customerId: string;
+    planConfig: ReturnType<typeof getPlan>;
+    dto: RegisterAndSubscribeDTO;
+  }): Promise<{
+    subscriptionId: string;
+    paymentId: string | null;
+    status: string;
+    invoiceUrl?: string;
+    paymentRedirect?: boolean;
+  }> {
+    const { customerId, planConfig, dto } = params;
+
+    try {
+      return await this.asaasService.createSubscriptionWithCard({
+        customerId,
+        value: planConfig.value,
+        cycle: planConfig.cycle,
+        description: planConfig.description,
+        creditCard: dto.credit_card,
+        creditCardHolderInfo: dto.credit_card_holder_info,
+        remoteIp: dto.remoteIp,
+      });
+    } catch (err) {
+      if (!isCardAuthorizationError(err) || !env.isAsaasSandbox) {
+        throw err;
+      }
+
+      const result = await this.asaasService.createSubscriptionViaInvoice({
+        customerId,
+        value: planConfig.value,
+        cycle: planConfig.cycle,
+        description: planConfig.description,
+      });
+
+      if (!result.paymentId) {
+        throw err;
+      }
+
+      try {
+        await this.asaasService.payPendingPaymentWithCard(
+          result.paymentId,
+          dto.credit_card,
+          dto.credit_card_holder_info,
+          dto.remoteIp
+        );
+        return result;
+      } catch (payErr) {
+        if (!isCardAuthorizationError(payErr) || !result.invoiceUrl) {
+          throw payErr;
+        }
+        return { ...result, paymentRedirect: true };
+      }
+    }
   }
 
   private async resolveStudent(params: {
